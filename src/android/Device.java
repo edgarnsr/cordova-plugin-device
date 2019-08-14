@@ -19,6 +19,7 @@
 package org.apache.cordova.device;
 
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
@@ -28,7 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.provider.Settings;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 public class Device extends CordovaPlugin {
     public static final String TAG = "Device";
@@ -109,7 +111,15 @@ public class Device extends CordovaPlugin {
      * @return
      */
     public String getUuid() {
-        String uuid = Settings.Secure.getString(this.cordova.getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+	Context context = this.cordova.getActivity().getApplicationContext();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("cordova-plugin-device",Context.MODE_PRIVATE);
+        String uuid = sharedPreferences.getString("device-uuid","");
+
+        if ("".equals(uuid)) {
+            uuid = UUID.randomUUID().toString();
+            sharedPreferences.edit().putString("device-uuid",uuid).commit();
+        }
+
         return uuid;
     }
 
